@@ -1,9 +1,9 @@
 package painter
 
 import (
-	"image"
-
 	"golang.org/x/exp/shiny/screen"
+	"image"
+	"sync"
 )
 
 // Receiver отримує текстуру, яка була підготовлена в результаті виконання команд у циклі подій.
@@ -46,15 +46,46 @@ func (l *Loop) Post(op Operation) {
 func (l *Loop) StopAndWait() {
 }
 
-// TODO: Реалізувати чергу подій.
-type messageQueue struct{}
+type messageQueue struct {
+	operations []Operation
+	mutex      *sync.Mutex
+	condition  *sync.Cond
+}
 
-func (mq *messageQueue) push(op Operation) {}
+func initMessageQueue() messageQueue {
+	mutex := &sync.Mutex{}
+	return messageQueue{
+		mutex:      mutex,
+		condition:  sync.NewCond(mutex),
+		operations: make([]Operation, 0),
+	}
+}
+
+func (mq *messageQueue) push(op Operation) {
+	mq.mutex.Lock()
+	defer mq.mutex.Unlock()
+
+	mq.operations = append(mq.operations, op)
+	mq.condition.Signal()
+}
 
 func (mq *messageQueue) pull() Operation {
-	return nil
+	mq.mutex.Lock()
+	defer mq.mutex.Unlock()
+
+	for mq.empty() {
+		mq.condition.Wait()
+	}
+
+	op := mq.operations[0]
+	mq.operations = mq.operations[1:]
+	return op
+}
+
+func (mq *messageQueue) len() int {
+	return len(mq.operations)
 }
 
 func (mq *messageQueue) empty() bool {
-	return false
+	return mq.len() == 0
 }
