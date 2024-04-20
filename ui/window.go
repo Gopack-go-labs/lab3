@@ -114,14 +114,16 @@ func (pw *Visualizer) handleEvent(e any, t screen.Texture) {
 		log.Printf("ERROR: %s", e)
 
 	case mouse.Event:
-		if t == nil {
-			// TODO: Реалізувати реакцію на натискання кнопки миші.
+		if t == nil && e.Button == mouse.ButtonRight {
+			pw.drawDefaultUI()
+			pw.drawFigure(image.Point{X: int(e.X), Y: int(e.Y)})
 		}
 
 	case paint.Event:
 		// Малювання контенту вікна.
 		if t == nil {
 			pw.drawDefaultUI()
+			pw.drawFigure(pw.sz.Bounds().Size().Div(2))
 		} else {
 			// Використання текстури отриманої через виклик Update.
 			pw.w.Scale(pw.sz.Bounds(), t, t.Bounds(), draw.Src, nil)
@@ -132,8 +134,6 @@ func (pw *Visualizer) handleEvent(e any, t screen.Texture) {
 
 func (pw *Visualizer) drawDefaultUI() {
 	pw.w.Fill(pw.sz.Bounds(), colornames.Green700, draw.Src)
-
-	pw.drawFigure(pw.sz.Bounds().Size().Div(2))
 
 	for _, br := range imageutil.Border(pw.sz.Bounds(), 10) {
 		pw.w.Fill(br, colornames.LightGreen300, draw.Src)
