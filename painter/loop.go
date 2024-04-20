@@ -30,20 +30,35 @@ var size = image.Pt(400, 400)
 func (l *Loop) Start(s screen.Screen) {
 	l.next, _ = s.NewTexture(size)
 	l.prev, _ = s.NewTexture(size)
+	l.stop = make(chan struct{})
+	l.mq = initMessageQueue()
 
-	// TODO: стартувати цикл подій.
+	go func() {
+		for !(l.stopReq && l.mq.empty()) {
+			op := l.mq.pull()
+
+			if op.Do(l.next) {
+				l.Receiver.Update(l.next)
+				l.next, l.prev = l.prev, l.next
+			}
+		}
+
+		close(l.stop)
+	}()
 }
 
 // Post додає нову операцію у внутрішню чергу.
 func (l *Loop) Post(op Operation) {
-	if update := op.Do(l.next); update {
-		l.Receiver.Update(l.next)
-		l.next, l.prev = l.prev, l.next
-	}
+	l.mq.push(op)
 }
 
 // StopAndWait сигналізує про необхідність завершити цикл та блокується до моменту його повної зупинки.
 func (l *Loop) StopAndWait() {
+	l.mq.push(OperationFunc(func(t screen.Texture) {
+		l.stopReq = true
+	}))
+
+	<-l.stop
 }
 
 type messageQueue struct {
