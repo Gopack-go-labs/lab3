@@ -1,8 +1,8 @@
 package ui
 
 import (
+	"golang.org/x/exp/shiny/materialdesign/colornames"
 	"image"
-	"image/color"
 	"log"
 
 	"golang.org/x/exp/shiny/driver"
@@ -114,14 +114,16 @@ func (pw *Visualizer) handleEvent(e any, t screen.Texture) {
 		log.Printf("ERROR: %s", e)
 
 	case mouse.Event:
-		if t == nil {
-			// TODO: Реалізувати реакцію на натискання кнопки миші.
+		if t == nil && e.Button == mouse.ButtonRight {
+			pw.drawDefaultUI()
+			pw.drawFigure(image.Point{X: int(e.X), Y: int(e.Y)})
 		}
 
 	case paint.Event:
 		// Малювання контенту вікна.
 		if t == nil {
 			pw.drawDefaultUI()
+			pw.drawFigure(pw.sz.Bounds().Size().Div(2))
 		} else {
 			// Використання текстури отриманої через виклик Update.
 			pw.w.Scale(pw.sz.Bounds(), t, t.Bounds(), draw.Src, nil)
@@ -131,12 +133,23 @@ func (pw *Visualizer) handleEvent(e any, t screen.Texture) {
 }
 
 func (pw *Visualizer) drawDefaultUI() {
-	pw.w.Fill(pw.sz.Bounds(), color.Black, draw.Src) // Фон.
+	pw.w.Fill(pw.sz.Bounds(), colornames.Green700, draw.Src)
 
-	// TODO: Змінити колір фону та додати відображення фігури у вашому варіанті.
-
-	// Малювання білої рамки.
 	for _, br := range imageutil.Border(pw.sz.Bounds(), 10) {
-		pw.w.Fill(br, color.White, draw.Src)
+		pw.w.Fill(br, colornames.LightGreen300, draw.Src)
 	}
+}
+
+func (pw *Visualizer) drawFigure(center image.Point) {
+	width := 300
+	halfHeight := 150
+	figureColor := colornames.Yellow300
+
+	topLeft := center.Sub(image.Point{X: width / 2, Y: halfHeight})
+	bottomRight := topLeft.Add(image.Point{X: width, Y: halfHeight})
+	pw.w.Fill(image.Rectangle{Min: topLeft, Max: bottomRight}, figureColor, draw.Src)
+
+	middleTop := center.Sub(image.Point{X: width / (3 * 2), Y: 0})
+	middleBottom := middleTop.Add(image.Point{X: width / 3, Y: halfHeight})
+	pw.w.Fill(image.Rectangle{Min: middleTop, Max: middleBottom}, figureColor, draw.Src)
 }
