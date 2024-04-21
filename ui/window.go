@@ -26,15 +26,13 @@ type Visualizer struct {
 	tx   chan screen.Texture
 	done chan struct{}
 
-	sz  size.Event
-	pos image.Rectangle
+	sz        size.Event
+	figurePos image.Point
 }
 
 func (pw *Visualizer) Main() {
 	pw.tx = make(chan screen.Texture)
 	pw.done = make(chan struct{})
-	pw.pos.Max.X = 200
-	pw.pos.Max.Y = 200
 	driver.Main(pw.run)
 }
 
@@ -44,8 +42,12 @@ func (pw *Visualizer) Update(t screen.Texture) {
 
 func (pw *Visualizer) run(s screen.Screen) {
 	w, err := s.NewWindow(&screen.NewWindowOptions{
-		Title: pw.Title,
+		Title:  pw.Title,
+		Width:  800,
+		Height: 800,
 	})
+	pw.figurePos = image.Pt(400, 400)
+
 	if err != nil {
 		log.Fatal("Failed to initialize the app window:", err)
 	}
@@ -116,8 +118,8 @@ func (pw *Visualizer) handleEvent(e any, t screen.Texture) {
 
 	case mouse.Event:
 		if t == nil && e.Button == mouse.ButtonRight {
-			pw.drawDefaultUI()
-			pw.drawFigure()
+			pw.figurePos = image.Pt(int(e.X), int(e.Y))
+			pw.w.Send(paint.Event{})
 		}
 
 	case paint.Event:
@@ -142,7 +144,7 @@ func (pw *Visualizer) drawDefaultUI() {
 }
 
 func (pw *Visualizer) drawFigure() {
-	v, h := painter.FigureCoordinates(pw.sz.Bounds().Size().Div(2))
+	v, h := painter.FigureCoordinates(pw.figurePos)
 
 	pw.w.Fill(v, colornames.Yellow300, draw.Src)
 	pw.w.Fill(h, colornames.Yellow300, draw.Src)
