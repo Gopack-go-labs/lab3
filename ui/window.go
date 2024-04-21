@@ -1,6 +1,7 @@
 package ui
 
 import (
+	"github.com/roman-mazur/architecture-lab-3/painter"
 	"golang.org/x/exp/shiny/materialdesign/colornames"
 	"image"
 	"log"
@@ -116,14 +117,14 @@ func (pw *Visualizer) handleEvent(e any, t screen.Texture) {
 	case mouse.Event:
 		if t == nil && e.Button == mouse.ButtonRight {
 			pw.drawDefaultUI()
-			pw.drawFigure(image.Point{X: int(e.X), Y: int(e.Y)})
+			pw.drawFigure()
 		}
 
 	case paint.Event:
 		// Малювання контенту вікна.
 		if t == nil {
 			pw.drawDefaultUI()
-			pw.drawFigure(pw.sz.Bounds().Size().Div(2))
+			pw.drawFigure()
 		} else {
 			// Використання текстури отриманої через виклик Update.
 			pw.w.Scale(pw.sz.Bounds(), t, t.Bounds(), draw.Src, nil)
@@ -140,16 +141,9 @@ func (pw *Visualizer) drawDefaultUI() {
 	}
 }
 
-func (pw *Visualizer) drawFigure(center image.Point) {
-	width := 300
-	halfHeight := 150
-	figureColor := colornames.Yellow300
+func (pw *Visualizer) drawFigure() {
+	v, h := painter.FigureCoordinates(pw.sz.Bounds().Size().Div(2))
 
-	topLeft := center.Sub(image.Point{X: width / 2, Y: halfHeight})
-	bottomRight := topLeft.Add(image.Point{X: width, Y: halfHeight})
-	pw.w.Fill(image.Rectangle{Min: topLeft, Max: bottomRight}, figureColor, draw.Src)
-
-	middleTop := center.Sub(image.Point{X: width / (3 * 2), Y: 0})
-	middleBottom := middleTop.Add(image.Point{X: width / 3, Y: halfHeight})
-	pw.w.Fill(image.Rectangle{Min: middleTop, Max: middleBottom}, figureColor, draw.Src)
+	pw.w.Fill(v, colornames.Yellow300, draw.Src)
+	pw.w.Fill(h, colornames.Yellow300, draw.Src)
 }
