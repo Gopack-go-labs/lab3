@@ -37,7 +37,7 @@ func (l *Loop) Start(s screen.Screen) {
 		for !(l.stopReq && l.mq.empty()) {
 			op := l.mq.pull()
 
-			if op.Do(l.next) {
+			if ready := op.Do(l.next); ready {
 				l.Receiver.Update(l.next)
 				l.next, l.prev = l.prev, l.next
 			}
