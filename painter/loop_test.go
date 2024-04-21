@@ -20,12 +20,12 @@ func TestLoop_Post(t *testing.T) {
 	var testOps []string
 
 	l.Start(mockScreen{})
-	l.Post(logOp(t, "do white fill", WhiteFill))
-	l.Post(logOp(t, "do green fill", GreenFill))
+	l.Post(logOp(t, "do white fill", WhiteFillOp()))
+	l.Post(logOp(t, "do green fill", GreenFillOp()))
 	l.Post(UpdateOp)
 
 	for i := 0; i < 3; i++ {
-		go l.Post(logOp(t, "do green fill", GreenFill))
+		go l.Post(logOp(t, "do green fill", GreenFillOp()))
 	}
 
 	l.Post(OperationFunc(func(screen.Texture) {
@@ -59,10 +59,10 @@ func TestLoop_Post(t *testing.T) {
 	}
 }
 
-func logOp(t *testing.T, msg string, op OperationFunc) OperationFunc {
+func logOp(t *testing.T, msg string, op Operation) OperationFunc {
 	return func(tx screen.Texture) {
 		t.Log(msg)
-		op(tx)
+		op.Do(tx)
 	}
 }
 

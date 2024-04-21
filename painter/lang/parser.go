@@ -14,7 +14,7 @@ func (p *Parser) Parse(in io.Reader) ([]painter.Operation, error) {
 	var res []painter.Operation
 
 	// TODO: Реалізувати парсинг команд.
-	res = append(res, painter.OperationFunc(painter.WhiteFill))
+	res = append(res, painter.WhiteFillOp())
 	res = append(res, painter.UpdateOp)
 
 	return res, nil
