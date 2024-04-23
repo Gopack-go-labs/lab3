@@ -1,6 +1,7 @@
 package painter
 
 import (
+	"image"
 	"image/color"
 
 	"golang.org/x/exp/shiny/screen"
@@ -37,12 +38,65 @@ func (f OperationFunc) Do(t screen.Texture) bool {
 	return false
 }
 
-// WhiteFill зафарбовує тестуру у білий колір. Може бути викоистана як Operation через OperationFunc(WhiteFill).
-func WhiteFill(t screen.Texture) {
-	t.Fill(t.Bounds(), color.White, screen.Src)
+type FillOp struct{ OperationFunc }
+
+func WhiteFillOp() FillOp {
+	return FillOp{
+		OperationFunc: func(t screen.Texture) {
+			t.Fill(t.Bounds(), color.White, screen.Src)
+		},
+	}
 }
 
-// GreenFill зафарбовує тестуру у зелений колір. Може бути викоистана як Operation через OperationFunc(GreenFill).
-func GreenFill(t screen.Texture) {
-	t.Fill(t.Bounds(), color.RGBA{G: 0xff, A: 0xff}, screen.Src)
+func GreenFillOp() FillOp {
+	return FillOp{
+		OperationFunc: func(t screen.Texture) {
+			t.Fill(t.Bounds(), color.RGBA{G: 0xff, A: 0xff}, screen.Src)
+		},
+	}
+}
+
+type BgRectOp struct{ OperationFunc }
+
+func BgRect(rect image.Rectangle) BgRectOp {
+	return BgRectOp{
+		OperationFunc: func(t screen.Texture) {
+			t.Fill(rect, color.Black, screen.Src)
+		},
+	}
+}
+
+type Figure struct {
+	center image.Point
+	color  color.RGBA
+}
+
+func FigureOp(center image.Point, color color.RGBA) *Figure {
+	return &Figure{center, color}
+}
+
+func (f *Figure) Do(t screen.Texture) bool {
+	horizontal, vertical := FigureCoordinates(f.center)
+	t.Fill(horizontal, f.color, screen.Src)
+	t.Fill(vertical, f.color, screen.Src)
+	return false
+}
+
+type MoveOp struct{ OperationFunc }
+
+func Move(figures []Figure, vector image.Point) MoveOp {
+	return MoveOp{
+		OperationFunc: func(t screen.Texture) {
+			for i := range figures {
+				figures[i].center = figures[i].center.Add(vector)
+				figures[i].Do(t)
+			}
+		},
+	}
+}
+
+func Reset() OperationFunc {
+	return func(t screen.Texture) {
+		t.Fill(t.Bounds(), color.Black, screen.Src)
+	}
 }

@@ -24,7 +24,7 @@ type Loop struct {
 	stopReq bool
 }
 
-var size = image.Pt(400, 400)
+var size = image.Pt(800, 800)
 
 // Start запускає цикл подій. Цей метод потрібно запустити до того, як викликати на ньому будь-які інші методи.
 func (l *Loop) Start(s screen.Screen) {
@@ -37,7 +37,7 @@ func (l *Loop) Start(s screen.Screen) {
 		for !(l.stopReq && l.mq.empty()) {
 			op := l.mq.pull()
 
-			if op.Do(l.next) {
+			if ready := op.Do(l.next); ready {
 				l.Receiver.Update(l.next)
 				l.next, l.prev = l.prev, l.next
 			}
