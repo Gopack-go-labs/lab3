@@ -75,6 +75,7 @@ func (p *Parser) parse(commandLine string) painter.Operation {
 		op = painter.Move(state.OperationList(), image.Point{x, y})
 
 	case "reset":
+		state.fg = []painter.Operation{}
 		op = painter.Reset()
 	}
 
