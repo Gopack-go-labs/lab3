@@ -92,13 +92,7 @@ func Move(opList OperationList, vector image.Point) MoveOp {
 		}
 	}
 	return MoveOp{
-		OperationFunc: func(t screen.Texture) {
-			for _, op := range opList {
-				if figure, isFigure := op.(*Figure); isFigure {
-					figure.Do(t)
-				}
-			}
-		},
+		OperationFunc: func(t screen.Texture) {},
 	}
 }
 

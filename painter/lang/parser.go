@@ -21,7 +21,6 @@ var state *State = &State{}
 // Парсинг команд
 func (p *Parser) Parse(in io.Reader) ([]painter.Operation, error) {
 	var res []painter.Operation
-	// state = &State{}
 
 	scanner := bufio.NewScanner(in)
 
@@ -55,25 +54,29 @@ func (p *Parser) parse(commandLine string) painter.Operation {
 	case "bgrect":
 		var rect image.Rectangle
 
-		rect.Min.X, _ = strconv.Atoi(args[1])
-		rect.Min.Y, _ = strconv.Atoi(args[2])
-		rect.Max.X, _ = strconv.Atoi(args[3])
-		rect.Max.Y, _ = strconv.Atoi(args[4])
+		rect.Min.X = conv(args[1])
+		rect.Min.Y = conv(args[2])
+		rect.Max.X = conv(args[3])
+		rect.Max.Y = conv(args[4])
 		
 		op = painter.BgRect(rect)
 	
 	case "figure":
 		figureColor := color.RGBA{0xff, 0xf1, 0x76, 0xff}
 		var center image.Point
-		center.X, _ = strconv.Atoi(args[1])
-		center.Y, _ = strconv.Atoi(args[2])
+		
+		center.X = conv(args[1])
+		center.Y = conv(args[2])
+		
 		op = painter.FigureOp(center, figureColor)
 	
 	case "move":
-		x, _ := strconv.Atoi(args[1])
-		y, _ := strconv.Atoi(args[2])
+		var center image.Point
 
-		op = painter.Move(state.OperationList(), image.Point{x, y})
+		center.X = conv(args[1])
+		center.Y = conv(args[2])
+
+		op = painter.Move(state.OperationList(), center)
 
 	case "reset":
 		state.fg = []painter.Operation{}
@@ -84,4 +87,16 @@ func (p *Parser) parse(commandLine string) painter.Operation {
 	}
 
 	return op
+}
+
+func conv(f string) int {
+	wSize := 800
+	num, err := strconv.ParseFloat(f, 64)
+
+	if err != nil {
+		log.Printf("Cannot convert %s", f)
+	}
+
+	res := int(float64(wSize) * num)
+	return res
 }
