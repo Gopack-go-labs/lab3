@@ -5,6 +5,7 @@ import (
 	"image"
 	"image/color"
 	"io"
+	"log"
 	"strconv"
 	"strings"
 
@@ -77,6 +78,9 @@ func (p *Parser) parse(commandLine string) painter.Operation {
 	case "reset":
 		state.fg = []painter.Operation{}
 		op = painter.Reset()
+	
+	default:
+		log.Panic("Unknown operation")
 	}
 
 	return op
