@@ -102,8 +102,12 @@ func Move(opList OperationList, vector image.Point) MoveOp {
 	}
 }
 
-func Reset() OperationFunc {
-	return func(t screen.Texture) {
-		t.Fill(t.Bounds(), color.Black, screen.Src)
+type ResetOp struct{ OperationFunc }
+
+func Reset() FillOp {
+	return FillOp{
+		OperationFunc: func(t screen.Texture) {
+			t.Fill(t.Bounds(), color.Black, screen.Src)
+		},
 	}
 }
