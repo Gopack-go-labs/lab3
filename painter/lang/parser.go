@@ -15,10 +15,12 @@ import (
 type Parser struct {
 } 
 
+var state *State = &State{}
+
 // Парсинг команд
 func (p *Parser) Parse(in io.Reader) ([]painter.Operation, error) {
 	var res []painter.Operation
-	state := &State{}
+	// state = &State{}
 
 	scanner := bufio.NewScanner(in)
 
@@ -67,8 +69,13 @@ func (p *Parser) parse(commandLine string) painter.Operation {
 		op = painter.FigureOp(center, figureColor)
 	
 	case "move":
+		x, _ := strconv.Atoi(args[1])
+		y, _ := strconv.Atoi(args[2])
+
+		op = painter.Move(state.OperationList(), image.Point{x, y})
 
 	case "reset":
+		op = painter.Reset()
 	}
 
 	return op
