@@ -84,12 +84,19 @@ func (f *Figure) Do(t screen.Texture) bool {
 
 type MoveOp struct{ OperationFunc }
 
-func Move(figures []Figure, vector image.Point) MoveOp {
+func Move(opList OperationList, vector image.Point) MoveOp {
+	for _, op := range opList {
+		if figure, isFigure := op.(*Figure); isFigure {
+			figure.center.X = vector.X
+			figure.center.Y = vector.Y
+		}
+	}
 	return MoveOp{
 		OperationFunc: func(t screen.Texture) {
-			for i := range figures {
-				figures[i].center = figures[i].center.Add(vector)
-				figures[i].Do(t)
+			for _, op := range opList {
+				if figure, isFigure := op.(*Figure); isFigure {
+					figure.Do(t)
+				}
 			}
 		},
 	}
