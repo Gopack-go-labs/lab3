@@ -19,8 +19,5 @@ jobs:
       with:
         go-version: '1.22'
 
-    - name: Run build
-      run: make out/example
-
     - name: Run test
       run: make test

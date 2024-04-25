@@ -1,11 +1,9 @@
-default: out/example
+LANG=en_US.UTF-8
+SHELL=/bin/bash
+.SHELLFLAGS=--norc --noprofile -e -u -o pipefail -c
 
-clean:
-	rm -rf out
+run:
+	go run ./cmd/painter
 
-test: *.go
+test:
 	go test ./...
-
-out/example: cmd/painter/main.go
-	mkdir -p out
-	go build -o out/example ./cmd/painter
