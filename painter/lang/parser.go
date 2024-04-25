@@ -2,6 +2,7 @@ package lang
 
 import (
 	"bufio"
+	"fmt"
 	"image"
 	"image/color"
 	"io"
@@ -16,17 +17,15 @@ import (
 type Parser struct {
 } 
 
-var state *State = &State{}
-
 // Парсинг команд
-func (p *Parser) Parse(in io.Reader) ([]painter.Operation, error) {
+func (p *Parser) Parse(in io.Reader, state *State) ([]painter.Operation, error) {
 	var res []painter.Operation
 
 	scanner := bufio.NewScanner(in)
 
 	for scanner.Scan() {
 		commandLine := scanner.Text()
-		op := p.parse(commandLine) // parse the line to get Operation
+		op := p.parse(commandLine, state) // parse the line to get Operation
 		state.AddOperation(op)
 	}
 
@@ -35,7 +34,7 @@ func (p *Parser) Parse(in io.Reader) ([]painter.Operation, error) {
 	return res, nil
 }
 
-func (p *Parser) parse(commandLine string) painter.Operation {
+func (p *Parser) parse(commandLine string, state *State) painter.Operation {
 	var op painter.Operation
 
 	args := strings.Split(commandLine, " ")
@@ -83,7 +82,7 @@ func (p *Parser) parse(commandLine string) painter.Operation {
 		op = painter.Reset()
 	
 	default:
-		log.Panic("Unknown operation")
+		fmt.Println("Warning: Unknown operation")
 	}
 
 	return op
