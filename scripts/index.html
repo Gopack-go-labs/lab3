@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <body>
+    <button onclick="sendGreenFrame()">Green frame</button>
+    <button onclick="sendMove()">Move</button>
+
+    <script>
+      let moveId = null;
+
+      function sendGreenFrame() {
+        if (moveId) clearInterval(moveId);
+
+        fetch('http://localhost:17000', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'text/plain',
+          },
+          body: 'reset\nwhite\nbgrect 0.25 0.25 0.8 0.8\nfigure 0.5 0.5\ngreen\nfigure 0.6 0.6\nupdate',
+        });
+      }
+
+      function sendMove() {
+        if (moveId) clearInterval(moveId)
+        let x = 0.5;
+        let y = 0.5;
+        let step = 0.1;
+
+        fetch('http://localhost:17000', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'text/plain',
+          },
+          body: 'reset\ngreen\nfigure 0.5 0.5\nupdate',
+        });
+
+        moveId = setInterval(() => {
+          if (x + step > 1 && y + step > 1) step = -0.1;
+          else if (x + step < 0 && y + step < 0) step = 0.1;
+
+          x += step;
+          y += step;
+
+          fetch('http://localhost:17000', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'text/plain',
+            },
+            body: `move ${x} ${y}`,
+          });
+        }, 1000);
+      };
+    </script>
+  </body>
+</html>
