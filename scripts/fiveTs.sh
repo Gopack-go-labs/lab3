@@ -8,11 +8,13 @@ step=1
 
 sleep $timeinterval
 
+curl -X POST http://localhost:17000 -d "reset"
+curl -X POST http://localhost:17000 -d "update"
+
 while true; do
 
 curl -X POST http://localhost:17000 -d "white"
 curl -X POST http://localhost:17000 -d "green"
-
 
 sleep $timeinterval
 
